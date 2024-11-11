@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Social Media Links";
+}
+
+<h2>Follow Us</h2>
+
+<div class="flex">
+    <div>
+        <a href="@ViewBag.Facebook">Facebook</a>
+    </div>
+
+    @if (@ViewBag.Instagram != null)
+    {
+        <environment exclude="Development">
+            <div>
+                <a href="@ViewBag.Instagram">Instagram</a>
+            </div>
+        </environment>
+    }
+
+    <div>
+        <a href="@ViewBag.Twitter">Twitter</a>
+    </div>
+
+    <div>
+        <a href="@ViewBag.Youtube">Youtube</a>
+    </div>
+</div>
+
