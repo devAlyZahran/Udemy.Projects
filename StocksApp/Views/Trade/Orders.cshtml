@@ -29,7 +29,7 @@
                     <h5 class="mb">@buyOrder.Quantity <span class="text-grey">shares at </span> $@buyOrder.Price?.ToString("N")</h5>
                     <h5 class="mb"><span class="text-grey">Trade Amount: </span> $@buyOrder.TradeAmount?.ToString("N")</h5>
 
-                    <div class="text-grey">@buyOrder.DateAndTimeOfOrder.Value.ToString("dd MMMM yyyy hh:mm:ss tt")</div>
+                    <div class="text-grey">@buyOrder?.DateAndTimeOfOrder?.ToString("dd MMMM yyyy hh:mm:ss tt")</div>
                 </div>
             }
 
