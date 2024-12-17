@@ -1,0 +1,43 @@
+﻿@model OrdersViewModel
+@{
+    Layout = null;
+}
+
+<table class="table w-100 mt">
+    <thead>
+        <tr>
+            <th>Date and Time</th>
+            <th>Stock</th>
+            <th>Order Type</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Trade Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (BuyOrderResponse bo in Model.BuyOrders)
+        {
+            <tr>
+                <td>@bo.DateAndTimeOfOrder</td>
+                <td>@bo.StockName</td>
+                <td>@bo.GetType().Name</td>
+                <td>@bo.Quantity</td>
+                <td>$ @bo.Price</td>
+                <td>@bo.TradeAmount</td>
+            </tr>
+        }
+
+        @foreach (SellOrderResponse so in Model.SellOrders)
+        {
+            <tr>
+                <td>@so.DateAndTimeOfOrder</td>
+                <td>@so.StockName</td>
+                <td>@so.GetType().Name</td>
+                <td>@so.Quantity</td>
+                <td>$ @so.Price</td>
+                <td>@so.TradeAmount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+

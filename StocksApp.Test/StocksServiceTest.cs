@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using StocksApp.Entities;
 using StocksApp.ServiceContracts;
 using StocksApp.ServiceContracts.DTOs;
 using StocksApp.Services;
@@ -15,7 +17,7 @@ namespace StocksApp.Test
         private readonly ITestOutputHelper _outputHelper;
         public StocksServiceTest(ITestOutputHelper outputHelper)
         {
-            _stocksService = new StocksService();
+            _stocksService = new StocksService(new StocksDbContext(new DbContextOptionsBuilder<StocksDbContext>().Options));
             _outputHelper = outputHelper;
         }
 

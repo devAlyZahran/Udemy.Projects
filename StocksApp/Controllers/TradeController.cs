@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Rotativa.AspNetCore;
 using StocksApp.IServices;
 using StocksApp.ServiceContracts;
 using StocksApp.ServiceContracts.DTOs;
@@ -106,6 +107,24 @@ namespace StocksApp.Controllers
             Guid id = sellOrderResponse.SellOrderID;
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> OrdersPDF()
+        {
+            List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
+            List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
+
+            OrdersViewModel viewModel = new OrdersViewModel()
+            {
+                BuyOrders = buyOrderResponses,
+                SellOrders = sellOrderResponses
+            };
+
+            return new ViewAsPdf("OrdersPDF", viewModel, ViewData)
+            {
+                PageMargins = new Rotativa.AspNetCore.Options.Margins() { Bottom = 20, Left = 20, Right = 20, Top = 20 },
+                PageOrientation = Rotativa.AspNetCore.Options.Orientation.Landscape
+            };
         }
     }
 }
