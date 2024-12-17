@@ -3,6 +3,8 @@
     Layout = null;
 }
 
+<link href="@("http://" + Context.Request.Host.ToString() + "/css/Stylesheet.css")" rel="stylesheet" />
+
 <table class="table w-100 mt">
     <thead>
         <tr>
@@ -18,24 +20,24 @@
         @foreach (BuyOrderResponse bo in Model.BuyOrders)
         {
             <tr>
-                <td>@bo.DateAndTimeOfOrder</td>
-                <td>@bo.StockName</td>
-                <td>@bo.GetType().Name</td>
-                <td>@bo.Quantity</td>
-                <td>$ @bo.Price</td>
-                <td>@bo.TradeAmount</td>
+                <td width="18%">@bo.DateAndTimeOfOrder</td>
+                <td width="20%">@bo.StockName</td>
+                <td width="10%">BuyOrder</td>
+                <td width="9%">@bo.Quantity</td>
+                <td width="9%">$ @bo.Price</td>
+                <td width="13%">@bo.TradeAmount</td>
             </tr>
         }
 
         @foreach (SellOrderResponse so in Model.SellOrders)
         {
             <tr>
-                <td>@so.DateAndTimeOfOrder</td>
-                <td>@so.StockName</td>
-                <td>@so.GetType().Name</td>
-                <td>@so.Quantity</td>
-                <td>$ @so.Price</td>
-                <td>@so.TradeAmount</td>
+                <td width="18%">@so.DateAndTimeOfOrder</td>
+                <td width="20%">@so.StockName</td>
+                <td width="10%">SellOrder</td>
+                <td width="9%">@so.Quantity</td>
+                <td width="9%">$ @so.Price</td>
+                <td width="13%">@so.TradeAmount</td>
             </tr>
         }
     </tbody>

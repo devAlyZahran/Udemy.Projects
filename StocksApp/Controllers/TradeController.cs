@@ -111,6 +111,7 @@ namespace StocksApp.Controllers
 
         public async Task<IActionResult> OrdersPDF()
         {
+
             List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
             List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
 
