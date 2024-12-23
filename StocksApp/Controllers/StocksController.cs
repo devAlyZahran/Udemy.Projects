@@ -6,6 +6,7 @@ using StocksApp.ViewModels;
 
 namespace StocksApp.Controllers
 {
+    [Route("[controller]")]
     public class StocksController : Controller
     {
         private readonly TradingOptions _tradingOptions;

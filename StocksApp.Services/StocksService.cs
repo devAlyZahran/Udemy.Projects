@@ -1,4 +1,5 @@
-﻿using StocksApp.Entities;
+﻿using Microsoft.Extensions.Logging;
+using StocksApp.Entities;
 using StocksApp.RepositoryContracts;
 using StocksApp.ServiceContracts;
 using StocksApp.ServiceContracts.DTOs;
@@ -8,11 +9,13 @@ namespace StocksApp.Services
     public class StocksService : IStocksService
     {
 
-        private readonly IStocksRepository _stocksReposiitory;
+        private readonly IStocksRepository _stocksRepository;
+        private readonly ILogger<StocksService> _logger;
 
-        public StocksService(IStocksRepository stocksRepository)
+        public StocksService(IStocksRepository stocksRepository, ILogger<StocksService> logger)
         {
-            _stocksReposiitory = stocksRepository;
+            _stocksRepository = stocksRepository;
+            _logger = logger;
         }
 
         public BuyOrderResponse CreateBuyOrder(BuyOrderRequest? buyOrderRequest)
@@ -25,7 +28,9 @@ namespace StocksApp.Services
             BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
             buyOrder.BuyOrderID = Guid.NewGuid();
 
-            _stocksReposiitory.CreateBuyOrder(buyOrder);
+            _stocksRepository.CreateBuyOrder(buyOrder);
+
+            _logger.LogInformation("Buy Order Created");
 
             return buyOrder.ToBuyOrderResponse();
         }
@@ -40,19 +45,39 @@ namespace StocksApp.Services
             SellOrder sellOrder = sellOrderRequest.ToSellOrder();
             sellOrder.SellOrderID = Guid.NewGuid();
 
-            _stocksReposiitory.CreateSellOrder(sellOrder);
+            _stocksRepository.CreateSellOrder(sellOrder);
 
             return sellOrder.ToSellOrderResponse();
         }
 
         public List<BuyOrderResponse> GetBuyOrders()
         {
-            return _stocksReposiitory.GetBuyOrders().Result.Select(b => b.ToBuyOrderResponse()).ToList();
+            List<BuyOrderResponse> result = new List<BuyOrderResponse>();
+            try
+            {
+                result = _stocksRepository.GetBuyOrders().Result.Select(b => b.ToBuyOrderResponse()).ToList();
+                _logger.LogError($"Buy Orders Count: {result.Count}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"There's an error while reading Buy Orders, Excepton: {ex.Message}");
+            }
+            return result;
         }
 
         public List<SellOrderResponse> GetSellOrders()
         {
-            return _stocksReposiitory.GetSellOrders().Result.Select(b => b.ToSellOrderResponse()).ToList();
+            List<SellOrderResponse> result = new List<SellOrderResponse>();
+            try
+            {
+                result = _stocksRepository.GetSellOrders().Result.Select(b => b.ToSellOrderResponse()).ToList();
+                _logger.LogError($"Sell Orders Count: {result.Count}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"There's an error while reading Sell Orders, Excepton: {ex.Message}");
+            }
+            return result;
         }
     }
 }

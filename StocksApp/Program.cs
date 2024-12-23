@@ -1,5 +1,7 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
+using Serilog;
 using StocksApp.Entities;
 using StocksApp.IServices;
 using StocksApp.RepositoryContracts;
@@ -10,6 +12,10 @@ using StocksApp.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider servises, LoggerConfiguration loggerConfiguration) =>
+{
+    loggerConfiguration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(servises);
+});
 
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
@@ -25,6 +31,8 @@ builder.Services.AddDbContext<StocksDbContext>(options =>
 });
 
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 if (builder.Environment.IsDevelopment())
 {

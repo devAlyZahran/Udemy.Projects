@@ -16,13 +16,15 @@ namespace StocksApp.Controllers
         private readonly IStocksService _stocksService;
         private readonly IConfiguration _configuration;
         private readonly TradingOptions _options;
+        private readonly ILogger<TradeController> _logger;
 
-        public TradeController(IFinnhubService finnhubService, IConfiguration configuration, IOptions<TradingOptions> options, IStocksService stocksService)
+        public TradeController(IFinnhubService finnhubService, IConfiguration configuration, IOptions<TradingOptions> options, IStocksService stocksService, ILogger<TradeController> logger)
         {
             _finnhubService = finnhubService;
             _configuration = configuration;
             _options = options.Value;
             _stocksService = stocksService;
+            _logger = logger;
         }
 
         [Route("/")]
@@ -65,7 +67,7 @@ namespace StocksApp.Controllers
                 BuyOrders = buyOrderResponses,
                 SellOrders = sellOrderResponses
             };
-
+            _logger.LogInformation($"Buy Orders count: {buyOrderResponses.Count} && Sell Orders Count: {sellOrderResponses.Count}");
             //ViewBag.TradingOptions = _options;
 
             return View(ordersViewModel);
