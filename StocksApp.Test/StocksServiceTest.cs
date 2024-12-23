@@ -1,5 +1,9 @@
+using AutoFixture;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using StocksApp.Entities;
+using StocksApp.RepositoryContracts;
 using StocksApp.ServiceContracts;
 using StocksApp.ServiceContracts.DTOs;
 using StocksApp.Services;
@@ -15,9 +19,19 @@ namespace StocksApp.Test
     {
         private readonly IStocksService _stocksService;
         private readonly ITestOutputHelper _outputHelper;
+        private readonly IFixture _fixture;
+
+        private readonly IStocksRepository _stocksRepository;
+        private readonly Mock<IStocksRepository> _stocksRepositoryMock;
+
         public StocksServiceTest(ITestOutputHelper outputHelper)
         {
-            _stocksService = new StocksService(new StocksDbContext(new DbContextOptionsBuilder<StocksDbContext>().Options));
+            _fixture = new Fixture();
+
+            _stocksRepositoryMock = new Mock<IStocksRepository>();
+            _stocksRepository = _stocksRepositoryMock.Object;
+
+            _stocksService = new StocksService(_stocksRepository);
             _outputHelper = outputHelper;
         }
 
@@ -25,131 +39,164 @@ namespace StocksApp.Test
 
         // 1. When you supply BuyOrderRequest as null, it should throw ArgumentNullException.
         [Fact]
-        public void CreateBuyOrder_NullObject()
+        public async Task CreateBuyOrder_NullObject()
         {
             // Arrange
             BuyOrderRequest? buyOrderRequest = null;
 
-            // Assert
-            Assert.Throws<ArgumentNullException>(() =>
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            // Assert
+            await action.Should().ThrowAsync<ArgumentNullException>();
         }
 
         // 2. When you supply buyOrderQuantity as 0 (as per the specification, minimum is 1), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_ZeroBuyOrderQuantity()
+        public async Task CreateBuyOrder_ZeroBuyOrderQuantity()
         {
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest {Quantity = 0};
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.Quantity, (uint)0)
+                .Create();
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
+
         }
 
         // 3. When you supply buyOrderQuantity as 100001 (as per the specification, maximum is 100000), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_BuyOrderQuantityEquals100001()
+        public async Task CreateBuyOrder_BuyOrderQuantityEquals100001()
         {
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest { Quantity = 100001 };
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.Quantity, (uint)100001)
+                .Create();
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         // 4. When you supply buyOrderPrice as 0 (as per the specification, minimum is 1), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_ZeroBuyOrderPrice()
+        public async Task CreateBuyOrder_ZeroBuyOrderPrice()
         {
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest { Price = 0 };
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.Price, 0)
+                .Create();
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         // 5. When you supply buyOrderPrice as 10001 (as per the specification, maximum is 10000), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_BuyOrderPriceEquals100001()
+        public async Task CreateBuyOrder_BuyOrderPriceEquals100001()
         {
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest { Price = 100001 };
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.Price, 100001)
+                .Create();
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         // 6. When you supply stock symbol=null (as per the specification, stock symbol can't be null), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_NullableStockSymbol()
+        public async Task CreateBuyOrder_NullableStockSymbol()
         {
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest { StockSymbol = null };
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.StockSymbol, null as string)
+                .Create();
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         // 7. When you supply dateAndTimeOfOrder as "1999-12-31" (YYYY-MM-DD) - (as per the specification, it should be equal or newer date than 2000-01-01), it should throw ArgumentException.
         [Fact]
-        public void CreateBuyOrder_InvalidDateAndTimeOfOrder()
+        public async Task CreateBuyOrder_InvalidDateAndTimeOfOrder()
         {
-            // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest { DateAndTimeOfOrder = DateTime.Parse("1999-12-31") };
 
-            // Assert
-            Assert.Throws<ArgumentException>(() =>
+            // Arrange
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.DateAndTimeOfOrder, Convert.ToDateTime("1999-12-31"))
+                .Create();
+
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
+
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            Func<Task> action = async () =>
             {
-                // Act
                 _stocksService.CreateBuyOrder(buyOrderRequest);
-            });
+            };
+
+            await action.Should().ThrowAsync<ArgumentException>();
         }
 
         // 8. If you supply all valid values, it should be successful and return an object of BuyOrderResponse type with auto-generated BuyOrderID(guid).
         [Fact]
-        public void CreateBuyOrder_ValidValues()
+        public async Task CreateBuyOrder_ValidValues()
         {
-
             // Arrange
-            BuyOrderRequest? buyOrderRequest = new BuyOrderRequest
-            {
-                DateAndTimeOfOrder = DateTime.Parse("2002-01-01"),
-                Price = 150,
-                Quantity = 10,
-                StockName = "Head Phone",
-                StockSymbol = "MSFT"
-            };
+            BuyOrderRequest? buyOrderRequest = _fixture.Build<BuyOrderRequest>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create();
 
-            // Act
-            BuyOrderResponse buyOrderResponse = _stocksService.CreateBuyOrder(buyOrderRequest);
-            List<BuyOrderResponse> allBuyOrderResponses = _stocksService.GetBuyOrders();
+            BuyOrder buyOrder = buyOrderRequest.ToBuyOrder();
 
-            // Assert
-            Assert.True(buyOrderResponse?.BuyOrderID != null);
-            Assert.Contains(buyOrderResponse, allBuyOrderResponses);
+            _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
+
+            BuyOrderResponse buyOrderResponse_actual = _stocksService.CreateBuyOrder(buyOrderRequest);
+
+            buyOrderResponse_actual.BuyOrderID.Should().NotBeEmpty();
         }
         #endregion
 
@@ -264,24 +311,18 @@ namespace StocksApp.Test
         [Fact]
         public void CreateSellOrder_ValidValues()
         {
-
             // Arrange
-            SellOrderRequest? sellOrderRequest = new SellOrderRequest
-            {
-                DateAndTimeOfOrder = DateTime.Parse("2002-01-01"),
-                Price = 150,
-                Quantity = 10,
-                StockName = "Head Phone",
-                StockSymbol = "MSFT"
-            };
+            SellOrderRequest? sellOrderRequest = _fixture.Build<SellOrderRequest>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create();
 
-            // Act
-            SellOrderResponse sellOrderResponse = _stocksService.CreateSellOrder(sellOrderRequest);
-            List<SellOrderResponse> allSellOrderResponses = _stocksService.GetSellOrders();
+            SellOrder sellOrder_expected = sellOrderRequest.ToSellOrder();
 
-            // Assert
-            Assert.True(sellOrderResponse?.SellOrderID != null);
-            Assert.Contains(sellOrderResponse, allSellOrderResponses);
+            _stocksRepositoryMock.Setup(s => s.CreateSellOrder(It.IsAny<SellOrder>())).ReturnsAsync(sellOrder_expected);
+
+            SellOrderResponse sellOrderResponse_actual = _stocksService.CreateSellOrder(sellOrderRequest);
+
+            sellOrderResponse_actual.SellOrderID.Should().NotBeEmpty();
         }
 
         #endregion
@@ -289,11 +330,14 @@ namespace StocksApp.Test
         #region GetAllBuyOrders
         // 1. When you invoke this method, by default, the returned list should be empty.
         [Fact]
-        public void GetAllBuyOrders_EmptyList()
+        public async Task GetAllBuyOrders_EmptyList()
         {
+            var buyOrders = new List<BuyOrder>();
+            _stocksRepositoryMock.Setup(s => s.GetBuyOrders()).ReturnsAsync(buyOrders);
+
             List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
 
-            Assert.Empty(buyOrderResponses);
+            buyOrderResponses.Should().BeEmpty();
         }
 
 
@@ -304,60 +348,42 @@ namespace StocksApp.Test
             // Arrange countries to get their names and pass it to persons objects
             // that we'll use to add them to a list and try to retrieve this list
 
-            BuyOrderRequest buyOrderRequest1 = new BuyOrderRequest()
+            List<BuyOrder> buyOrders = new List<BuyOrder>
             {
-                Quantity = 1,
-                Price = 1,
-                DateAndTimeOfOrder = DateTime.Parse("2002-01-01"),
-                StockName = "Name 1",
-                StockSymbol = "SMFT"
-            };
-            BuyOrderRequest buyOrderRequest2 = new BuyOrderRequest()
-            {
-                Quantity = 10,
-                Price = 22,
-                DateAndTimeOfOrder = DateTime.Parse("2003-01-01"),
-                StockName = "Name 2",
-                StockSymbol = "SMFT"
-            };
-            BuyOrderRequest buyOrderRequest3 = new BuyOrderRequest()
-            {
-                Quantity = 12,
-                Price = 34,
-                DateAndTimeOfOrder = DateTime.Parse("2004-01-01"),
-                StockName = "Name 3",
-                StockSymbol = "SMFT"
+                _fixture.Build<BuyOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create(),
+
+                _fixture.Build<BuyOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create(),
+
+                _fixture.Build<BuyOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create()
             };
 
-            List<BuyOrderRequest> buyOrderRequests = new List<BuyOrderRequest>() { buyOrderRequest1, buyOrderRequest2, buyOrderRequest3 };
-            List<BuyOrderResponse> buyOrderResponseList_from_add = new List<BuyOrderResponse>();
-
-            foreach (BuyOrderRequest buyOrderAddRequest in buyOrderRequests)
-            {
-                BuyOrderResponse buyOrderResponse = _stocksService.CreateBuyOrder(buyOrderAddRequest);
-                buyOrderResponseList_from_add.Add(buyOrderResponse);
-            }
+            List<BuyOrderResponse> buyOrderResponses_expected = buyOrders.Select(b => b.ToBuyOrderResponse()).ToList();
 
             _outputHelper.WriteLine("Expected:");
-            foreach (BuyOrderResponse item in buyOrderResponseList_from_add)
+            foreach (BuyOrderResponse item in buyOrderResponses_expected)
             {
                 _outputHelper.WriteLine(item.ToString());
             }
+            _stocksRepositoryMock.Setup(s => s.GetBuyOrders()).ReturnsAsync(buyOrders);
+
 
             // Act
-            List<BuyOrderResponse> buyOrderResponseList_from_get = _stocksService.GetBuyOrders();
+            List<BuyOrderResponse> buyOrderResponseList_from_actual = _stocksService.GetBuyOrders();
 
             _outputHelper.WriteLine("Actual:");
-            foreach (BuyOrderResponse item in buyOrderResponseList_from_get)
+            foreach (BuyOrderResponse item in buyOrderResponseList_from_actual)
             {
                 _outputHelper.WriteLine(item.ToString());
             }
 
             // Assert
-            foreach (BuyOrderResponse buyOrderResponse_from_add in buyOrderResponseList_from_add)
-            {
-                Assert.Contains(buyOrderResponse_from_add, buyOrderResponseList_from_get);
-            }
+            buyOrderResponseList_from_actual.Should().BeEquivalentTo(buyOrderResponses_expected);
         }
         #endregion
 
@@ -366,9 +392,11 @@ namespace StocksApp.Test
         [Fact]
         public void GetAllSellOrders_EmptyList()
         {
+            var sellOrders = new List<SellOrder>();
+            _stocksRepositoryMock.Setup(s => s.GetSellOrders()).ReturnsAsync(sellOrders);
             List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
 
-            Assert.Empty(sellOrderResponses);
+            sellOrderResponses.Should().BeEmpty();
         }
 
         // When you first add few sell orders using CreateSellOrder() method; and then invoke GetAllSellOrders() method; the returned list should contain all the same sell orders.
@@ -377,61 +405,43 @@ namespace StocksApp.Test
         {
             // Arrange countries to get their names and pass it to persons objects
             // that we'll use to add them to a list and try to retrieve this list
+            List<SellOrder> sellOrders = new List<SellOrder>
+            {
+                _fixture.Build<SellOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create(),
 
-            SellOrderRequest sellOrderRequest1 = new SellOrderRequest()
-            {
-                Quantity = 1,
-                Price = 1,
-                DateAndTimeOfOrder = DateTime.Parse("2002-01-01"),
-                StockName = "Name 1",
-                StockSymbol = "SMFT"
-            };
-            SellOrderRequest sellOrderRequest2 = new SellOrderRequest()
-            {
-                Quantity = 10,
-                Price = 22,
-                DateAndTimeOfOrder = DateTime.Parse("2003-01-01"),
-                StockName = "Name 2",
-                StockSymbol = "SMFT"
-            };
-            SellOrderRequest sellOrderRequest3 = new SellOrderRequest()
-            {
-                Quantity = 12,
-                Price = 34,
-                DateAndTimeOfOrder = DateTime.Parse("2004-01-01"),
-                StockName = "Name 3",
-                StockSymbol = "SMFT"
+                _fixture.Build<SellOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create(),
+
+                _fixture.Build<SellOrder>()
+                .With(p => p.StockSymbol, "MSFT")
+                .Create()
             };
 
-            List<SellOrderRequest> sellOrderRequests = new List<SellOrderRequest>() { sellOrderRequest1, sellOrderRequest2, sellOrderRequest3 };
-            List<SellOrderResponse> sellOrderResponseList_from_add = new List<SellOrderResponse>();
-
-            foreach (SellOrderRequest sellOrderAddRequest in sellOrderRequests)
-            {
-                SellOrderResponse sellOrderResponse = _stocksService.CreateSellOrder(sellOrderAddRequest);
-                sellOrderResponseList_from_add.Add(sellOrderResponse);
-            }
+            List<SellOrderResponse> sellOrderResponses_expected = sellOrders.Select(b => b.ToSellOrderResponse()).ToList();
 
             _outputHelper.WriteLine("Expected:");
-            foreach (SellOrderResponse item in sellOrderResponseList_from_add)
+            foreach (SellOrderResponse item in sellOrderResponses_expected)
             {
                 _outputHelper.WriteLine(item.ToString());
             }
+            _stocksRepositoryMock.Setup(s => s.GetSellOrders()).ReturnsAsync(sellOrders);
+
 
             // Act
-            List<SellOrderResponse> sellOrderResponseList_from_get = _stocksService.GetSellOrders();
+            List<SellOrderResponse> sellOrderResponseList_from_actual = _stocksService.GetSellOrders();
 
             _outputHelper.WriteLine("Actual:");
-            foreach (SellOrderResponse item in sellOrderResponseList_from_get)
+            foreach (SellOrderResponse item in sellOrderResponseList_from_actual)
             {
                 _outputHelper.WriteLine(item.ToString());
             }
 
             // Assert
-            foreach (SellOrderResponse sellOrderResponse_from_add in sellOrderResponseList_from_add)
-            {
-                Assert.Contains(sellOrderResponse_from_add, sellOrderResponseList_from_get);
-            }
+            sellOrderResponseList_from_actual.Should().BeEquivalentTo(sellOrderResponses_expected);
+
         }
         #endregion
 

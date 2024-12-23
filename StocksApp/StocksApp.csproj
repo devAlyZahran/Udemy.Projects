@@ -8,11 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="IServices\" />
-    <Folder Include="Services\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.36">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -22,6 +17,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StocksApp.Entities\StocksApp.Entities.csproj" />
+    <ProjectReference Include="..\StocksApp.RepositoryContracts\StocksApp.RepositoryContracts.csproj" />
+    <ProjectReference Include="..\StocksApp.Repostories\StocksApp.Repostories.csproj" />
     <ProjectReference Include="..\StocksApp.ServiceContracts\StocksApp.ServiceContracts.csproj" />
     <ProjectReference Include="..\StocksApp.Services\StocksApp.Services.csproj" />
   </ItemGroup>
