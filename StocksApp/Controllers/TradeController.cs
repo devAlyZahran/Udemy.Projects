@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Rotativa.AspNetCore;
+using StocksApp.Filters.ActionFilter;
 using StocksApp.IServices;
 using StocksApp.ServiceContracts;
 using StocksApp.ServiceContracts.DTOs;
@@ -27,26 +28,59 @@ namespace StocksApp.Controllers
             _logger = logger;
         }
 
-        [Route("/")]
-        [Route("~/Trade/Index")]
-        public async Task<IActionResult> Index()
+        #region Commented
+        //[Route("/")]
+        //[Route("~/Trade/Index")]
+        //public async Task<IActionResult> Index()
+        //{
+        //    StockTrade stockTrade = new StockTrade();
+
+        //    string stockSymbol = !string.IsNullOrEmpty(_options.DefaultStockSymbol) ? _options.DefaultStockSymbol : "MSFT";
+
+        //    // Get Quote Service
+        //    Task<Dictionary<string, object>?> stockPriceQuote = _finnhubService.GetStockPriceQuote(stockSymbol);
+        //    Task<Dictionary<string, object>?> companyProfile = _finnhubService.GetCompanyProfile(stockSymbol);
+
+        //    //load data from finnHubService into model object
+        //    if (companyProfile != null && stockPriceQuote != null)
+        //    {
+        //        stockTrade = new StockTrade() { 
+        //            StockSymbol = Convert.ToString(companyProfile.Result["ticker"]), 
+        //            StockName = Convert.ToString(companyProfile.Result["name"]), 
+        //            Price = Convert.ToDouble(stockPriceQuote.Result["c"].ToString()) 
+        //        };
+        //    }
+
+        //    //Send Finnhub token to view
+        //    ViewBag.FinnhubToken = _configuration["FinnhubToken"];
+
+        //    return View(stockTrade);
+        //} 
+        #endregion
+
+        [Route("[action]/{stockSymbol}")]
+        [Route("~/Trade/Index/{stockSymbol}")]
+        public async Task<IActionResult> Index(string stockSymbol)
         {
-            StockTrade stockTrade = new StockTrade();
+            //reset stock symbol if not exists
+            if (string.IsNullOrEmpty(stockSymbol))
+                stockSymbol = "MSFT";
 
-            string stockSymbol = !string.IsNullOrEmpty(_options.DefaultStockSymbol) ? _options.DefaultStockSymbol : "MSFT";
 
-            // Get Quote Service
-            Task<Dictionary<string, object>?> stockPriceQuote = _finnhubService.GetStockPriceQuote(stockSymbol);
-            Task<Dictionary<string, object>?> companyProfile = _finnhubService.GetCompanyProfile(stockSymbol);
+            //get company profile from API server
+            Dictionary<string, object>? companyProfileDictionary = await _finnhubService.GetCompanyProfile(stockSymbol);
+
+            //get stock price quotes from API server
+            Dictionary<string, object>? stockQuoteDictionary = await _finnhubService.GetStockPriceQuote(stockSymbol);
+
+
+            //create model object
+            StockTrade stockTrade = new StockTrade() { StockSymbol = stockSymbol };
 
             //load data from finnHubService into model object
-            if (companyProfile != null && stockPriceQuote != null)
+            if (companyProfileDictionary != null && stockQuoteDictionary != null)
             {
-                stockTrade = new StockTrade() { 
-                    StockSymbol = Convert.ToString(companyProfile.Result["ticker"]), 
-                    StockName = Convert.ToString(companyProfile.Result["name"]), 
-                    Price = Convert.ToDouble(stockPriceQuote.Result["c"].ToString()) 
-                };
+                stockTrade = new StockTrade() { StockSymbol = companyProfileDictionary["ticker"].ToString(), StockName = companyProfileDictionary["name"].ToString(), Quantity = _options.DefaultOrderQuantity ?? 0, Price = Convert.ToDouble(stockQuoteDictionary["c"].ToString()) };
             }
 
             //Send Finnhub token to view
@@ -56,6 +90,7 @@ namespace StocksApp.Controllers
         }
 
         [Route("~/Trade/Orders")]
+        [Route("/")]
         [HttpGet]
         public async Task<IActionResult> Orders()
         {
@@ -75,13 +110,14 @@ namespace StocksApp.Controllers
 
         [Route("~/Trade/BuyOrder")]
         [HttpPost]
-        public async Task<IActionResult> BuyOrder(BuyOrderRequest? buyOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        public async Task<IActionResult> BuyOrder(BuyOrderRequest? orderRequest)
         {
 
             if (!ModelState.IsValid)
                 return View();
 
-            BuyOrderResponse buyOrderResponse = _stocksService.CreateBuyOrder(buyOrderRequest);
+            BuyOrderResponse buyOrderResponse = _stocksService.CreateBuyOrder(orderRequest);
             Guid id = buyOrderResponse.BuyOrderID;
 
             return RedirectToAction(nameof(Index));
@@ -89,23 +125,24 @@ namespace StocksApp.Controllers
 
         [Route("~/Trade/SellOrder")]
         [HttpPost]
-        public async Task<IActionResult> SellOrder(SellOrderRequest? sellOrderRequest)
+        [TypeFilter(typeof(CreateOrderActionFilter))]
+        public async Task<IActionResult> SellOrder(SellOrderRequest? orderRequest)
         {
             //update date of order
-            sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+            orderRequest.DateAndTimeOfOrder = DateTime.Now;
 
             //re-validate the model object after updating the date
             ModelState.Clear();
-            TryValidateModel(sellOrderRequest);
+            TryValidateModel(orderRequest);
 
             if (!ModelState.IsValid)
             {
                 ViewBag.Errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                StockTrade stockTrade = new StockTrade() { StockName = sellOrderRequest.StockName, Quantity = sellOrderRequest.Quantity, StockSymbol = sellOrderRequest.StockSymbol };
+                StockTrade stockTrade = new StockTrade() { StockName = orderRequest.StockName, Quantity = orderRequest.Quantity, StockSymbol = orderRequest.StockSymbol };
                 return View("Index", stockTrade);
             }
 
-            SellOrderResponse sellOrderResponse = _stocksService.CreateSellOrder(sellOrderRequest);
+            SellOrderResponse sellOrderResponse = _stocksService.CreateSellOrder(orderRequest);
             Guid id = sellOrderResponse.SellOrderID;
 
             return RedirectToAction(nameof(Index));

@@ -24,8 +24,7 @@ namespace StocksApp.Controllers
             _finnhubService = finnhubService;
         }
 
-
-        [Route("/")]
+        
         [Route("[action]/{stock?}")]
         [Route("~/[action]/{stock?}")]
         public async Task<IActionResult> Explore(string? stock, bool showAll = false)

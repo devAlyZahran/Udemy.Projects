@@ -3,12 +3,13 @@ using StocksApp.Entities;
 using StocksApp.RepositoryContracts;
 using System.Net.Http;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StocksApp.Repostories
 {
     public class FinnhubRepository : IFinnhubRepository
     {
-        /*
+        
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
 
@@ -140,27 +141,8 @@ namespace StocksApp.Repostories
             //return response dictionary back to the caller
             return responseDictionary;
         }
-        */
+        
 
-        public Task<Dictionary<string, object>?> GetCompanyProfile(string stockSymbol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Dictionary<string, object>?> GetStockPriceQuote(string stockSymbol)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Dictionary<string, string>>?> GetStocks()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Dictionary<string, object>?> SearchStocks(string stockSymbolToSearch)
-        {
-            throw new NotImplementedException();
-        }
         
     }
 }

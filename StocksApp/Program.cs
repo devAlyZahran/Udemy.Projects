@@ -12,25 +12,38 @@ using StocksApp.ViewModels;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider servises, LoggerConfiguration loggerConfiguration) =>
-{
-    loggerConfiguration.ReadFrom.Configuration(context.Configuration).ReadFrom.Services(servises);
+//Serilog
+builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, LoggerConfiguration loggerConfiguration) => {
+
+    loggerConfiguration
+    .ReadFrom.Configuration(context.Configuration) //read configuration settings from built-in IConfiguration
+    .ReadFrom.Services(services); //read out current app's services and make them available to serilog
 });
 
+//Services
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
+builder.Services.AddTransient<IStocksService, StocksService>();
 builder.Services.AddTransient<IFinnhubService, FinnhubService>();
-builder.Services.AddScoped<IStocksService, StocksService>(); 
-builder.Services.AddScoped<IStocksRepository, StocksRepository>();
-builder.Services.AddScoped<IFinnhubRepository, FinnhubRepository>();
-builder.Services.AddHttpClient();
+builder.Services.AddTransient<IStocksRepository, StocksRepository>();
+builder.Services.AddTransient<IFinnhubRepository, FinnhubRepository>();
 
 builder.Services.AddDbContext<StocksDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+
+builder.Services.AddHttpLogging(options =>
+{
+    options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestProperties | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponsePropertiesAndHeaders;
+});
+
+builder.Services.AddHttpClient();
+
 var app = builder.Build();
+
+app.UseSerilogRequestLogging();
 
 app.UseHttpLogging();
 
