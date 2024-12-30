@@ -26,7 +26,7 @@ namespace StocksApp.Controllers
 
         
         [Route("[action]/{stock?}")]
-        [Route("~/[action]/{stock?}")]
+        [Route("~/Stocks/Explore/{stock?}")]
         public async Task<IActionResult> Explore(string? stock, bool showAll = false)
         {
             //get company profile from API server

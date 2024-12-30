@@ -4,6 +4,7 @@ using Rotativa.AspNetCore;
 using Serilog;
 using StocksApp.Entities;
 using StocksApp.IServices;
+using StocksApp.Middleware;
 using StocksApp.RepositoryContracts;
 using StocksApp.Repostories;
 using StocksApp.ServiceContracts;
@@ -45,12 +46,18 @@ var app = builder.Build();
 
 app.UseSerilogRequestLogging();
 
-app.UseHttpLogging();
-
 if (builder.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
+else
+{
+    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandlingMiddleware();
+}
+
+app.UseHttpLogging();
+
 RotativaConfiguration.Setup("wwwroot", wkhtmltopdfRelativePath: "Rotativa");
 
 app.UseStaticFiles();

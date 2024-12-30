@@ -59,7 +59,7 @@ namespace StocksApp.Controllers
         #endregion
 
         [Route("[action]/{stockSymbol}")]
-        [Route("~/Trade/Index/{stockSymbol}")]
+        [Route("~/Trade/Index/{stockSymbol?}")]
         public async Task<IActionResult> Index(string stockSymbol)
         {
             //reset stock symbol if not exists
