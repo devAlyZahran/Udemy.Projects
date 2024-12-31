@@ -17,7 +17,11 @@ namespace StocksApp.Test
 {
     public class StocksServiceTest
     {
-        private readonly IStocksService _stocksService;
+        private readonly IStocksSellAdderService _stocksSellAdderService;
+        private readonly IStocksSellGetterService _stocksSellGetterService;
+        private readonly IStocksBuyAdderService _stocksBuyAdderService;
+        private readonly IStocksBuyGetterService _stocksBuyGetterService;
+
         private readonly ITestOutputHelper _outputHelper;
         private readonly IFixture _fixture;
 
@@ -31,7 +35,10 @@ namespace StocksApp.Test
             _stocksRepositoryMock = new Mock<IStocksRepository>();
             _stocksRepository = _stocksRepositoryMock.Object;
 
-            _stocksService = new StocksService(_stocksRepository, null);
+            _stocksSellAdderService = new StocksSellService(_stocksRepository, null);
+            _stocksSellGetterService = new StocksSellService(_stocksRepository, null);
+            _stocksBuyAdderService = new StocksBuyService(_stocksRepository, null);
+            _stocksBuyGetterService = new StocksBuyService(_stocksRepository, null);
             _outputHelper = outputHelper;
         }
 
@@ -46,7 +53,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             // Assert
@@ -68,7 +75,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -90,7 +97,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -111,7 +118,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -132,7 +139,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -153,7 +160,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -175,7 +182,7 @@ namespace StocksApp.Test
 
             Func<Task> action = async () =>
             {
-                _stocksService.CreateBuyOrder(buyOrderRequest);
+                _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
             };
 
             await action.Should().ThrowAsync<ArgumentException>();
@@ -194,7 +201,7 @@ namespace StocksApp.Test
 
             _stocksRepositoryMock.Setup(s => s.CreateBuyOrder(It.IsAny<BuyOrder>())).ReturnsAsync(buyOrder);
 
-            BuyOrderResponse buyOrderResponse_actual = _stocksService.CreateBuyOrder(buyOrderRequest);
+            BuyOrderResponse buyOrderResponse_actual = _stocksBuyAdderService.CreateBuyOrder(buyOrderRequest);
 
             buyOrderResponse_actual.BuyOrderID.Should().NotBeEmpty();
         }
@@ -213,7 +220,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentNullException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -228,7 +235,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -243,7 +250,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -258,7 +265,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -273,7 +280,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -288,7 +295,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -303,7 +310,7 @@ namespace StocksApp.Test
             Assert.Throws<ArgumentException>(() =>
             {
                 // Act
-                _stocksService.CreateSellOrder(sellOrderRequest);
+                _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
             });
         }
 
@@ -320,7 +327,7 @@ namespace StocksApp.Test
 
             _stocksRepositoryMock.Setup(s => s.CreateSellOrder(It.IsAny<SellOrder>())).ReturnsAsync(sellOrder_expected);
 
-            SellOrderResponse sellOrderResponse_actual = _stocksService.CreateSellOrder(sellOrderRequest);
+            SellOrderResponse sellOrderResponse_actual = _stocksSellAdderService.CreateSellOrder(sellOrderRequest);
 
             sellOrderResponse_actual.SellOrderID.Should().NotBeEmpty();
         }
@@ -335,7 +342,7 @@ namespace StocksApp.Test
             var buyOrders = new List<BuyOrder>();
             _stocksRepositoryMock.Setup(s => s.GetBuyOrders()).ReturnsAsync(buyOrders);
 
-            List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
+            List<BuyOrderResponse> buyOrderResponses = _stocksBuyGetterService.GetBuyOrders();
 
             buyOrderResponses.Should().BeEmpty();
         }
@@ -374,7 +381,7 @@ namespace StocksApp.Test
 
 
             // Act
-            List<BuyOrderResponse> buyOrderResponseList_from_actual = _stocksService.GetBuyOrders();
+            List<BuyOrderResponse> buyOrderResponseList_from_actual = _stocksBuyGetterService.GetBuyOrders();
 
             _outputHelper.WriteLine("Actual:");
             foreach (BuyOrderResponse item in buyOrderResponseList_from_actual)
@@ -394,7 +401,7 @@ namespace StocksApp.Test
         {
             var sellOrders = new List<SellOrder>();
             _stocksRepositoryMock.Setup(s => s.GetSellOrders()).ReturnsAsync(sellOrders);
-            List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
+            List<SellOrderResponse> sellOrderResponses = _stocksSellGetterService.GetSellOrders();
 
             sellOrderResponses.Should().BeEmpty();
         }
@@ -431,7 +438,7 @@ namespace StocksApp.Test
 
 
             // Act
-            List<SellOrderResponse> sellOrderResponseList_from_actual = _stocksService.GetSellOrders();
+            List<SellOrderResponse> sellOrderResponseList_from_actual = _stocksSellGetterService.GetSellOrders();
 
             _outputHelper.WriteLine("Actual:");
             foreach (SellOrderResponse item in sellOrderResponseList_from_actual)

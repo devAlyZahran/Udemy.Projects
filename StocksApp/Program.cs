@@ -24,7 +24,10 @@ builder.Host.UseSerilog((HostBuilderContext context, IServiceProvider services, 
 //Services
 builder.Services.AddControllersWithViews();
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
-builder.Services.AddTransient<IStocksService, StocksService>();
+builder.Services.AddTransient<IStocksSellAdderService, StocksSellService>();
+builder.Services.AddTransient<IStocksSellGetterService, StocksSellService>();
+builder.Services.AddTransient<IStocksBuyAdderService, StocksBuyService>();
+builder.Services.AddTransient<IStocksBuyGetterService, StocksBuyService>();
 builder.Services.AddTransient<IFinnhubService, FinnhubService>();
 builder.Services.AddTransient<IStocksRepository, StocksRepository>();
 builder.Services.AddTransient<IFinnhubRepository, FinnhubRepository>();

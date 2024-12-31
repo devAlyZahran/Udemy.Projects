@@ -14,17 +14,23 @@ namespace StocksApp.Controllers
     {
 
         private readonly IFinnhubService _finnhubService;
-        private readonly IStocksService _stocksService;
+        private readonly IStocksSellAdderService _stocksSellAdderService;
+        private readonly IStocksSellGetterService _stocksSellGetterService;
+        private readonly IStocksBuyAdderService _stocksBuyAdderService;
+        private readonly IStocksBuyGetterService _stocksBuyGetterService;
         private readonly IConfiguration _configuration;
         private readonly TradingOptions _options;
         private readonly ILogger<TradeController> _logger;
 
-        public TradeController(IFinnhubService finnhubService, IConfiguration configuration, IOptions<TradingOptions> options, IStocksService stocksService, ILogger<TradeController> logger)
+        public TradeController(IFinnhubService finnhubService, IConfiguration configuration, IOptions<TradingOptions> options, IStocksSellAdderService stocksSellAdderService, IStocksSellGetterService stocksSellGetterService, IStocksBuyAdderService stocksBuyAdderService, IStocksBuyGetterService stocksBuyGetterService, ILogger<TradeController> logger)
         {
             _finnhubService = finnhubService;
             _configuration = configuration;
             _options = options.Value;
-            _stocksService = stocksService;
+            _stocksSellAdderService = stocksSellAdderService;
+            _stocksSellGetterService = stocksSellGetterService;
+            _stocksBuyAdderService = stocksBuyAdderService;
+            _stocksBuyGetterService = stocksBuyGetterService;
             _logger = logger;
         }
 
@@ -94,8 +100,8 @@ namespace StocksApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Orders()
         {
-            List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
-            List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
+            List<BuyOrderResponse> buyOrderResponses = _stocksBuyGetterService.GetBuyOrders();
+            List<SellOrderResponse> sellOrderResponses = _stocksSellGetterService.GetSellOrders();
 
             OrdersViewModel ordersViewModel = new OrdersViewModel()
             {
@@ -117,7 +123,7 @@ namespace StocksApp.Controllers
             if (!ModelState.IsValid)
                 return View();
 
-            BuyOrderResponse buyOrderResponse = _stocksService.CreateBuyOrder(orderRequest);
+            BuyOrderResponse buyOrderResponse = _stocksBuyAdderService.CreateBuyOrder(orderRequest);
             Guid id = buyOrderResponse.BuyOrderID;
 
             return RedirectToAction(nameof(Index));
@@ -142,7 +148,7 @@ namespace StocksApp.Controllers
                 return View("Index", stockTrade);
             }
 
-            SellOrderResponse sellOrderResponse = _stocksService.CreateSellOrder(orderRequest);
+            SellOrderResponse sellOrderResponse = _stocksSellAdderService.CreateSellOrder(orderRequest);
             Guid id = sellOrderResponse.SellOrderID;
 
             return RedirectToAction(nameof(Index));
@@ -151,8 +157,8 @@ namespace StocksApp.Controllers
         public async Task<IActionResult> OrdersPDF()
         {
 
-            List<SellOrderResponse> sellOrderResponses = _stocksService.GetSellOrders();
-            List<BuyOrderResponse> buyOrderResponses = _stocksService.GetBuyOrders();
+            List<SellOrderResponse> sellOrderResponses = _stocksSellGetterService.GetSellOrders();
+            List<BuyOrderResponse> buyOrderResponses = _stocksBuyGetterService.GetBuyOrders();
 
             OrdersViewModel viewModel = new OrdersViewModel()
             {
